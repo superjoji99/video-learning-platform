@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const session = await auth.api.getSession({ headers: request.headers });
+  // auth モジュールを直接インポートせず fetch 経由でセッション確認
+  const sessionRes = await fetch(
+    new URL("/api/auth/get-session", request.url),
+    {
+      headers: { cookie: request.headers.get("cookie") ?? "" },
+    }
+  );
+
+  const session = sessionRes.ok ? await sessionRes.json() : null;
 
   // 未ログインの場合は /login にリダイレクト
-  if (!session) {
+  if (!session?.user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -15,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
   // /admin は管理者のみ
   if (pathname.startsWith("/admin")) {
-    const role = (session.user as { role?: string }).role;
+    const role = session.user?.role as string | undefined;
     if (role !== "admin") {
       return NextResponse.redirect(new URL("/courses", request.url));
     }
