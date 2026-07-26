@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { ChapterForm } from "@/components/admin/ChapterForm";
 import { db } from "@/lib/db";
 import { chapters, courses } from "@/lib/schema";

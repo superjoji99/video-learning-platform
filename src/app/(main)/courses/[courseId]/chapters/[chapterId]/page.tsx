@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { buttonVariants } from "@/components/ui/button";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { db } from "@/lib/db";
